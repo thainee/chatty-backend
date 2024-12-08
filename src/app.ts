@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
-import { ChattyServer } from './setupServer';
-import connectDatabase from './setupDatabase';
+import { ChattyServer } from '@root/setupServer';
+import connectDatabase from '@root/setupDatabase';
 
 class Application {
   public initialize(): void {
