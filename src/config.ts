@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import bunyan from 'bunyan';
+import { v2 as cloudinary } from 'cloudinary';
 
 dotenv.config();
 
@@ -12,6 +13,9 @@ class Config {
   public readonly COOKIE_SECRET_KEY_TWO: string | undefined;
   public readonly CLIENT_URL: string | undefined;
   public readonly REDIS_URL: string | undefined;
+  public readonly CLOUD_NAME: string | undefined;
+  public readonly CLOUD_API_KEY: string | undefined;
+  public readonly CLOUD_API_SECRET: string | undefined;
 
   constructor() {
     this.DATABASE_URL = process.env.DATABASE_URL;
@@ -22,20 +26,33 @@ class Config {
     this.COOKIE_SECRET_KEY_TWO = process.env.COOKIE_SECRET_KEY_TWO;
     this.CLIENT_URL = process.env.CLIENT_URL;
     this.REDIS_URL = process.env.REDIS_URL;
+    this.CLOUD_NAME = process.env.CLOUD_NAME;
+    this.CLOUD_API_KEY = process.env.CLOUD_API_KEY;
+    this.CLOUD_API_SECRET = process.env.CLOUD_API_SECRET;
 
-    this.validateConfig();
+    this.validateEnvVars();
+    this.configCloudinary();
   }
 
   public createLogger(name: string): bunyan {
     return bunyan.createLogger({ name, level: 'debug' });
   }
 
-  private validateConfig(): void {
+  private validateEnvVars(): void {
     for (const [key, value] of Object.entries(this)) {
       if (value === undefined) {
         throw new Error(`Configuaration error: ${key} is not defined`);
       }
     }
+  }
+
+  private configCloudinary(): void {
+    cloudinary.config({
+      cloud_name: this.CLOUD_NAME,
+      api_key: this.CLOUD_API_KEY,
+      api_secret: this.CLOUD_API_SECRET,
+      secure: this.NODE_ENV === 'development' ? false : true
+    });
   }
 }
 
