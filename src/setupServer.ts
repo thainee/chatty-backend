@@ -18,6 +18,7 @@ import { Server } from 'socket.io';
 import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import Logger from 'bunyan';
+import morgan from 'morgan';
 import { config } from '@root/config';
 import applicationRoutes from '@root/routes';
 import { CustomError, IErrorResponse } from '@globals/helpers/error-handler';
@@ -45,7 +46,7 @@ export class ChattyServer {
         name: 'session',
         keys: [config.COOKIE_SECRET_KEY_ONE!, config.COOKIE_SECRET_KEY_TWO!],
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure: config.NODE_ENV === 'development' ? false : true
+        secure: config.NODE_ENV !== 'development'
       })
     );
     app.use(hpp());
@@ -67,6 +68,9 @@ export class ChattyServer {
   }
 
   private routesMiddleware(app: Application): void {
+    if (config.NODE_ENV === 'development') {
+      app.use(morgan('dev'));
+    }
     applicationRoutes(app);
   }
 
