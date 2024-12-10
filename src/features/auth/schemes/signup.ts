@@ -7,6 +7,12 @@ const signupSchema: ObjectSchema = Joi.object().keys({
     'string.max': 'Username cannot be more than 30 characters',
     'string.empty': 'Username is a required field'
   }),
+  fullname: Joi.string().trim().required().min(4).max(30).messages({
+    'string.base': 'Fullname must be of type string',
+    'string.min': 'Fullname cannot be less than 4 characters',
+    'string.max': 'Fullname cannot be more than 30 characters',
+    'string.empty': 'Fullname is a required field'
+  }),
   password: Joi.string().trim().required().min(6).max(30).messages({
     'string.base': 'Password must be of type string',
     'string.min': 'Password cannot be less than 6 characters',
