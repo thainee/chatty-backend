@@ -51,7 +51,7 @@ class Config {
       cloud_name: this.CLOUD_NAME,
       api_key: this.CLOUD_API_KEY,
       api_secret: this.CLOUD_API_SECRET,
-      secure: this.NODE_ENV === 'development' ? false : true
+      secure: this.NODE_ENV !== 'development'
     });
   }
 }

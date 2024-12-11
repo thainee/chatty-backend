@@ -26,7 +26,7 @@ import { CustomError, IErrorResponse } from '@globals/helpers/error-handler';
 const log: Logger = config.createLogger('server');
 
 export class ChattyServer {
-  private app: Application;
+  private readonly app: Application;
 
   constructor(app: Application) {
     this.app = app;
