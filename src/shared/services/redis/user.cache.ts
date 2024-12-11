@@ -6,7 +6,7 @@ import { ServerError } from '@globals/helpers/error-handler';
 
 const log: Logger = config.createLogger('userCache');
 
-export class UserCache extends BaseCache {
+class UserCache extends BaseCache {
   constructor() {
     super('userCache');
   }
@@ -16,6 +16,25 @@ export class UserCache extends BaseCache {
     userUId: string,
     createdUser: IUserDocument
   ): Promise<void> {
+    const dataToSave: string[] = this.prepareCacheData(createdUser);
+
+    try {
+      if (!this.client.isOpen) {
+        await this.client.connect();
+      }
+
+      await this.client.ZADD('user', {
+        score: parseInt(userUId, 10),
+        value: `${key}`
+      });
+      await this.client.HSET(`users:${key}`, dataToSave);
+    } catch (error) {
+      log.error(error);
+      throw new ServerError('Server error. Try again.');
+    }
+  }
+
+  private prepareCacheData(user: IUserDocument): string[] {
     const createdAt = new Date();
     const {
       _id,
@@ -38,7 +57,7 @@ export class UserCache extends BaseCache {
       bgImageId,
       bgImageVersion,
       social
-    } = createdUser;
+    } = user;
 
     const firstList: string[] = [
       '_id',
@@ -91,20 +110,8 @@ export class UserCache extends BaseCache {
       `${bgImageId}`
     ];
 
-    const dataToSave: string[] = [...firstList, ...secondList, ...thirdList];
-
-    try {
-      if (!this.client.isOpen) {
-        await this.client.connect();
-      }
-      await this.client.ZADD('user', {
-        score: parseInt(userUId, 10),
-        value: `${key}`
-      });
-      await this.client.HSET(`users:${key}`, dataToSave);
-    } catch (error) {
-      log.error(error);
-      throw new ServerError('Server error. Try again.');
-    }
+    return [...firstList, ...secondList, ...thirdList];
   }
 }
+
+export const userCache: UserCache = new UserCache();

@@ -10,66 +10,71 @@ import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploadToCloudinary } from '@globals/helpers/cloudinary-upload';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { Helpers } from '@globals/helpers/helpers';
-import { UserCache } from '@services/redis/user.cache';
 import { config } from '@root/config';
+import { userCache } from '@services/redis/user.cache';
 
-const userCache: UserCache = new UserCache();
-
-class SignUp {
+export class SignUp {
   @joiValidation(signupSchema)
   public async createUser(req: Request, res: Response): Promise<void> {
     const { username, fullname, password, email, avatarColor, avatarImage } =
       req.body;
-    const [userByEmail, userByUsername] = await Promise.all([
+
+    const [existingUserByEmail, existingUserByUsername] = await Promise.all([
       authService.getUserByEmail(email),
       authService.getUserByUsername(username)
     ]);
 
-    if (userByEmail) {
+    if (existingUserByEmail) {
       throw new BadRequestError('Email already exists');
     }
 
-    if (userByUsername) {
+    if (existingUserByUsername) {
       throw new BadRequestError('Username already exists');
     }
 
     const authObjectId = new ObjectId();
     const userObjectId = new ObjectId();
     const uId = `${Helpers.generateRandomIntegers(12)}`;
-    const authData = signUpController.signUpData({
-      _id: authObjectId,
-      uId,
-      username,
-      fullname,
-      email,
-      password,
-      avatarColor
-    });
-    const imageLink = await uploadToCloudinary(avatarImage, {
+
+    const authDocumentData: IAuthDocument =
+      SignUp.prototype.prepareAuthDocumentData({
+        _id: authObjectId,
+        uId,
+        username,
+        fullname,
+        email,
+        password,
+        avatarColor
+      });
+
+    const cloudinaryUploadResult = await uploadToCloudinary(avatarImage, {
       public_id: `${userObjectId}`,
       overwrite: true,
       invalidate: true
     });
 
-    if (!imageLink?.public_id) {
+    if (!cloudinaryUploadResult?.public_id) {
       throw new BadRequestError('Image upload failed');
     }
 
     // Add to redis cache
-    const userDataForCache: IUserDocument = signUpController.userData(
-      authData,
+    const userCacheData: IUserDocument = SignUp.prototype.prepareUserCacheData(
+      authDocumentData,
       userObjectId
     );
-    userDataForCache.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${imageLink.version}/${userObjectId}`;
-    await userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache);
+
+    userCacheData.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${cloudinaryUploadResult.version}/${userObjectId}`;
+
+    await userCache.saveUserToCache(`${userObjectId}`, uId, userCacheData);
 
     res
       .status(HTTP_STATUS.CREATED)
-      .json({ message: 'User created successfully', authData });
+      .json({ message: 'User created successfully', authDocumentData });
   }
 
-  private signUpData(data: ISignUpData): IAuthDocument {
+  private prepareAuthDocumentData(data: ISignUpData): IAuthDocument {
     const { _id, username, email, uId, password, avatarColor, fullname } = data;
+
     return {
       _id,
       uId,
@@ -82,8 +87,13 @@ class SignUp {
     } as IAuthDocument;
   }
 
-  private userData(data: IAuthDocument, userObjectId: ObjectId): IUserDocument {
-    const { _id, username, email, uId, password, avatarColor, fullname } = data;
+  private prepareUserCacheData(
+    authData: IAuthDocument,
+    userObjectId: ObjectId
+  ): IUserDocument {
+    const { _id, username, email, uId, password, avatarColor, fullname } =
+      authData;
+
     return {
       _id: userObjectId,
       authId: _id,
@@ -121,4 +131,4 @@ class SignUp {
   }
 }
 
-export const signUpController: SignUp = new SignUp();
+export const signUp = new SignUp();
