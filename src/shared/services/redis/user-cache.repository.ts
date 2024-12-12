@@ -1,17 +1,13 @@
 import Logger from 'bunyan';
 import { config } from '@root/config';
-import { BaseCache } from '@services/redis/base.cache';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { ServerError } from '@globals/helpers/error-handler';
+import { redisConnection } from '@services/redis/redis.connection';
 
-const log: Logger = config.createLogger('userCache');
+const log: Logger = config.createLogger('userCacheRepository');
 
-class UserCache extends BaseCache {
-  constructor() {
-    super('userCache');
-  }
-
-  public async saveUserToCache(
+class UserCacheRepository {
+  public async save(
     key: string,
     userUId: string,
     createdUser: IUserDocument
@@ -19,8 +15,8 @@ class UserCache extends BaseCache {
     const dataToSave: string[] = this.prepareCacheData(createdUser);
 
     try {
-      await this.client.zadd('user', parseInt(userUId, 10), key);
-      await this.client.hset(`users:${key}`, dataToSave);
+      await redisConnection.zadd('user', parseInt(userUId, 10), key);
+      await redisConnection.hset(`users:${key}`, dataToSave);
     } catch (error) {
       log.error(error);
       throw new ServerError('Server error. Try again.');
@@ -107,4 +103,5 @@ class UserCache extends BaseCache {
   }
 }
 
-export const userCache: UserCache = new UserCache();
+export const userCacheRepository: UserCacheRepository =
+  new UserCacheRepository();

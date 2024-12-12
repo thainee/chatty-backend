@@ -21,7 +21,7 @@ import morgan from 'morgan';
 import { config } from '@root/config';
 import applicationRoutes from '@root/routes';
 import { CustomError, IErrorResponse } from '@globals/helpers/error-handler';
-import Redis from 'ioredis';
+import { redisConnection } from '@services/redis/redis.connection';
 
 const log: Logger = config.createLogger('server');
 
@@ -123,7 +123,7 @@ export class ChattyServer {
       }
     });
 
-    const pubClient = new Redis();
+    const pubClient = redisConnection;
     const subClient = pubClient.duplicate();
     io.adapter(createAdapter(pubClient, subClient));
     return io;

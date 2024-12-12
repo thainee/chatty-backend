@@ -2,11 +2,11 @@ import { IAuthDocument } from '@auth/interfaces/auth.interface';
 import { AuthModel } from '@auth/models/auth.schema';
 
 class AuthService {
-  public async createAuthUser(data: IAuthDocument): Promise<void> {
+  public async createAuth(data: IAuthDocument): Promise<void> {
     await AuthModel.create(data);
   }
 
-  public async getUserByUsername(
+  public async getAuthByUsername(
     username: string
   ): Promise<IAuthDocument | null> {
     const query = { username: username.toLowerCase() };
@@ -16,7 +16,7 @@ class AuthService {
     return user;
   }
 
-  public async getUserByEmail(email: string): Promise<IAuthDocument | null> {
+  public async getAuthByEmail(email: string): Promise<IAuthDocument | null> {
     const query = {
       email: email.toLowerCase()
     };

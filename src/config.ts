@@ -10,7 +10,7 @@ dotenv.config();
 class Config {
   public readonly DATABASE_URL: string;
   public readonly SERVER_PORT: string;
-  public readonly JWT_TOKEN: string;
+  public readonly JWT_SECRET: string;
   public readonly NODE_ENV: string;
   public readonly COOKIE_SECRET_KEY_ONE: string;
   public readonly COOKIE_SECRET_KEY_TWO: string;
@@ -23,7 +23,7 @@ class Config {
   constructor() {
     this.DATABASE_URL = this.getEnvVar('DATABASE_URL');
     this.SERVER_PORT = this.getEnvVar('SERVER_PORT');
-    this.JWT_TOKEN = this.getEnvVar('JWT_TOKEN');
+    this.JWT_SECRET = this.getEnvVar('JWT_SECRET');
     this.NODE_ENV = process.env.NODE_ENV || 'development';
     this.COOKIE_SECRET_KEY_ONE = this.getEnvVar('COOKIE_SECRET_KEY_ONE');
     this.COOKIE_SECRET_KEY_TWO = this.getEnvVar('COOKIE_SECRET_KEY_TWO');

@@ -10,7 +10,7 @@ class AuthWorker {
     try {
       const { value } = job.data;
 
-      await authService.createAuthUser(value);
+      await authService.createAuth(value);
 
       await job.updateProgress(100);
     } catch (error) {
