@@ -69,7 +69,14 @@ export class ChattyServer {
 
   private routesMiddleware(app: Application): void {
     if (config.NODE_ENV === 'development') {
-      app.use(morgan('dev'));
+      app.use(
+        morgan('dev', {
+          skip: function (req: Request) {
+            const skipPaths = ['/queues'];
+            return skipPaths.some((path) => req.originalUrl.startsWith(path));
+          }
+        })
+      );
     }
     applicationRoutes(app);
   }
