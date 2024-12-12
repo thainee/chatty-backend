@@ -19,15 +19,8 @@ class UserCache extends BaseCache {
     const dataToSave: string[] = this.prepareCacheData(createdUser);
 
     try {
-      if (!this.client.isOpen) {
-        await this.client.connect();
-      }
-
-      await this.client.ZADD('user', {
-        score: parseInt(userUId, 10),
-        value: `${key}`
-      });
-      await this.client.HSET(`users:${key}`, dataToSave);
+      await this.client.zadd('user', parseInt(userUId, 10), key);
+      await this.client.hset(`users:${key}`, dataToSave);
     } catch (error) {
       log.error(error);
       throw new ServerError('Server error. Try again.');

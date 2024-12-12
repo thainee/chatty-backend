@@ -12,6 +12,9 @@ import { IUserDocument } from '@user/interfaces/user.interface';
 import { Helpers } from '@globals/helpers/helpers';
 import { config } from '@root/config';
 import { userCache } from '@services/redis/user.cache';
+import { omit } from 'lodash';
+import { authQueue } from '@services/queues/auth.queue';
+import { userQueue } from '@services/queues/user.queue';
 
 export class SignUp {
   @joiValidation(signupSchema)
@@ -66,6 +69,17 @@ export class SignUp {
     userCacheData.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${cloudinaryUploadResult.version}/${userObjectId}`;
 
     await userCache.saveUserToCache(`${userObjectId}`, uId, userCacheData);
+
+    // Add to database
+    omit(userCacheData, [
+      'uId',
+      'username',
+      'email',
+      'avatarColor',
+      'password'
+    ]);
+    authQueue.addAuthUserJob('addAuthUserToDB', { value: userCacheData });
+    userQueue.addUserJob('addUserToDB', { value: userCacheData });
 
     res
       .status(HTTP_STATUS.CREATED)

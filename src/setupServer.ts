@@ -15,13 +15,13 @@ import cookieSession from 'cookie-session';
 import HTTP_STATUS from 'http-status-codes';
 import 'express-async-errors';
 import { Server } from 'socket.io';
-import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import Logger from 'bunyan';
 import morgan from 'morgan';
 import { config } from '@root/config';
 import applicationRoutes from '@root/routes';
 import { CustomError, IErrorResponse } from '@globals/helpers/error-handler';
+import Redis from 'ioredis';
 
 const log: Logger = config.createLogger('server');
 
@@ -116,9 +116,8 @@ export class ChattyServer {
       }
     });
 
-    const pubClient = createClient({ url: config.REDIS_URL });
+    const pubClient = new Redis();
     const subClient = pubClient.duplicate();
-    await Promise.all([pubClient.connect(), subClient.connect()]);
     io.adapter(createAdapter(pubClient, subClient));
     return io;
   }
