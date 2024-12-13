@@ -1,15 +1,14 @@
 import { ObjectId } from 'mongodb';
 import { Request, Response } from 'express';
-import { UploadApiResponse } from 'cloudinary';
 import HTTP_STATUS from 'http-status-codes';
+import jwt from 'jsonwebtoken';
 import { joiValidation } from '@globals/decorators/joi-validation.decorator';
 import { signupSchema } from '@auth/validators/signup.joi';
-import { authService } from '@services/db/auth.service';
+import { authRepository } from '@services/db/auth.repository';
 import { BadRequestError } from '@globals/helpers/error-handler';
 import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploadToCloudinary } from '@globals/helpers/cloudinary-upload';
 import { IUserDocument } from '@user/interfaces/user.interface';
-import jwt from 'jsonwebtoken';
 import { Helpers } from '@globals/helpers/helpers';
 import { config } from '@root/config';
 import { userCacheRepository } from '@services/redis/user-cache.repository';
@@ -23,8 +22,8 @@ export class SignUp {
       req.body;
 
     const [existingAuthByEmail, existingAuthByUsername] = await Promise.all([
-      authService.getAuthByEmail(email),
-      authService.getAuthByUsername(username)
+      authRepository.getByEmail(email),
+      authRepository.getByUsername(username)
     ]);
 
     if (existingAuthByEmail) {

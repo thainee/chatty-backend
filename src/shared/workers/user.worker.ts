@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import Logger from 'bunyan';
 import { config } from '@root/config';
-import { userService } from '@services/db/user.service';
+import { userRepository } from '@services/db/user.repository';
 
 const log: Logger = config.createLogger('userWorker');
 
@@ -10,7 +10,7 @@ class UserWorker {
     try {
       const { value } = job.data;
 
-      await userService.createUser(value);
+      await userRepository.create(value);
 
       await job.updateProgress(100);
     } catch (error) {

@@ -1,14 +1,12 @@
 import { IAuthDocument } from '@auth/interfaces/auth.interface';
 import { AuthModel } from '@auth/models/auth.schema';
 
-class AuthService {
-  public async createAuth(data: IAuthDocument): Promise<void> {
+class AuthRepository {
+  public async create(data: IAuthDocument): Promise<void> {
     await AuthModel.create(data);
   }
 
-  public async getAuthByUsername(
-    username: string
-  ): Promise<IAuthDocument | null> {
+  public async getByUsername(username: string): Promise<IAuthDocument | null> {
     const query = { username: username.toLowerCase() };
 
     const user = await AuthModel.findOne(query);
@@ -16,7 +14,7 @@ class AuthService {
     return user;
   }
 
-  public async getAuthByEmail(email: string): Promise<IAuthDocument | null> {
+  public async getByEmail(email: string): Promise<IAuthDocument | null> {
     const query = {
       email: email.toLowerCase()
     };
@@ -26,7 +24,7 @@ class AuthService {
     return user;
   }
 
-  public async getAuthByUsernameOrEmail(
+  public async getByUsernameOrEmail(
     usernameOrEmail: string
   ): Promise<IAuthDocument | null> {
     const query = {
@@ -42,4 +40,4 @@ class AuthService {
   }
 }
 
-export const authService: AuthService = new AuthService();
+export const authRepository: AuthRepository = new AuthRepository();

@@ -2,12 +2,12 @@ import mongoose from 'mongoose';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { UserModel } from '@user/models/user.schema';
 
-class UserService {
-  public async createUser(data: IUserDocument): Promise<void> {
+class UserRepository {
+  public async create(data: IUserDocument): Promise<void> {
     await UserModel.create(data);
   }
 
-  public async getUserByAuthId(authId: string): Promise<IUserDocument> {
+  public async getByAuthId(authId: string): Promise<IUserDocument> {
     const users: IUserDocument[] = await UserModel.aggregate([
       { $match: { authId: new mongoose.Types.ObjectId(authId) } },
       {
@@ -53,4 +53,4 @@ class UserService {
   }
 }
 
-export const userService: UserService = new UserService();
+export const userRepository: UserRepository = new UserRepository();

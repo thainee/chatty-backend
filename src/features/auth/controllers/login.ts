@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import HTTP_STATUS from 'http-status-codes';
 import { joiValidation } from '@globals/decorators/joi-validation.decorator';
-import { authService } from '@services/db/auth.service';
 import { config } from '@root/config';
 import { loginSchema } from '@auth/validators/login.joi';
 import { BadRequestError } from '@globals/helpers/error-handler';
-import { userService } from '@services/db/user.service';
+import { authRepository } from '@services/db/auth.repository';
+import { userRepository } from '@services/db/user.repository';
 import { IUserDocument } from '@user/interfaces/user.interface';
 
 export class LogIn {
@@ -15,7 +15,7 @@ export class LogIn {
     const { usernameOrEmail, password } = req.body;
 
     const existingAuth =
-      await authService.getAuthByUsernameOrEmail(usernameOrEmail);
+      await authRepository.getByUsernameOrEmail(usernameOrEmail);
 
     if (!existingAuth) {
       throw new BadRequestError('Invalid credentials');
@@ -27,7 +27,7 @@ export class LogIn {
       throw new BadRequestError('Invalid credentials');
     }
 
-    const user = await userService.getUserByAuthId(`${existingAuth._id}`);
+    const user = await userRepository.getByAuthId(`${existingAuth._id}`);
 
     const userJWT = jwt.sign(
       {
