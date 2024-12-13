@@ -25,6 +25,21 @@ class AuthService {
 
     return user;
   }
+
+  public async getAuthByUsernameOrEmail(
+    usernameOrEmail: string
+  ): Promise<IAuthDocument | null> {
+    const query = {
+      $or: [
+        { username: usernameOrEmail.toLowerCase() },
+        { email: usernameOrEmail.toLowerCase() }
+      ]
+    };
+
+    const user = await AuthModel.findOne(query);
+
+    return user;
+  }
 }
 
 export const authService: AuthService = new AuthService();

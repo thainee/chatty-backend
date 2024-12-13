@@ -1,4 +1,5 @@
-import { signUp } from '@auth/controllers/signup';
+import { LogIn } from '@auth/controllers/login';
+import { SignUp } from '@auth/controllers/signup';
 import express, { Router } from 'express';
 
 export class AuthRouter {
@@ -10,7 +11,8 @@ export class AuthRouter {
   }
 
   private initRoutes(): void {
-    this.router.post('/signup', signUp.createUser);
+    this.router.post('/signup', SignUp.prototype.signUp);
+    this.router.post('/login', LogIn.prototype.logIn);
   }
 
   public routes(): Router {

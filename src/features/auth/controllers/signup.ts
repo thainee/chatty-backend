@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { UploadApiResponse } from 'cloudinary';
 import HTTP_STATUS from 'http-status-codes';
 import { joiValidation } from '@globals/decorators/joi-validation.decorator';
-import { signupSchema } from '@auth/schemes/signup';
+import { signupSchema } from '@auth/validators/signup.joi';
 import { authService } from '@services/db/auth.service';
 import { BadRequestError } from '@globals/helpers/error-handler';
 import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
@@ -18,20 +18,20 @@ import { userQueue } from '@services/queues/user.queue';
 
 export class SignUp {
   @joiValidation(signupSchema)
-  public async createUser(req: Request, res: Response): Promise<void> {
+  public async signUp(req: Request, res: Response): Promise<void> {
     const { username, fullname, password, email, avatarColor, avatarImage } =
       req.body;
 
-    const [existingUserByEmail, existingUserByUsername] = await Promise.all([
+    const [existingAuthByEmail, existingAuthByUsername] = await Promise.all([
       authService.getAuthByEmail(email),
       authService.getAuthByUsername(username)
     ]);
 
-    if (existingUserByEmail) {
+    if (existingAuthByEmail) {
       throw new BadRequestError('Email already exists');
     }
 
-    if (existingUserByUsername) {
+    if (existingAuthByUsername) {
       throw new BadRequestError('Username already exists');
     }
 
@@ -71,15 +71,17 @@ export class SignUp {
     await userCacheRepository.save(`${userObjectId}`, uId, userCacheData);
 
     // Add to database
-    authQueue.addAuthUserJob('addAuthUserToDB', { value: userCacheData });
+    authQueue.addAuthJob('addAuthToDB', { value: authDocumentData });
     userQueue.addUserJob('addUserToDB', { value: userCacheData });
 
     const userJWT = SignUp.prototype.signToken(authDocumentData, userObjectId);
     req.session = { jwt: userJWT };
 
-    res
-      .status(HTTP_STATUS.CREATED)
-      .json({ message: 'User created successfully', user: userCacheData, token: userJWT });
+    res.status(HTTP_STATUS.CREATED).json({
+      message: 'User created successfully',
+      user: userCacheData,
+      token: userJWT
+    });
   }
 
   private signToken(data: IAuthDocument, userObjectId: ObjectId): string {
@@ -153,5 +155,3 @@ export class SignUp {
     } as unknown as IUserDocument;
   }
 }
-
-export const signUp = new SignUp();
