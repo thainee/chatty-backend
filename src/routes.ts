@@ -8,6 +8,7 @@ export default (app: Application) => {
   const routes = () => {
     app.use('/queues', serverAdapter.getRouter());
     app.use(BASE_PATH, authRouter.routes());
+    app.use(BASE_PATH, authRouter.logoutRoute());
   };
   routes();
 };
