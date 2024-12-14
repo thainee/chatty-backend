@@ -15,17 +15,18 @@ import cookieSession from 'cookie-session';
 import HTTP_STATUS from 'http-status-codes';
 import 'express-async-errors';
 import { Server } from 'socket.io';
-import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import Logger from 'bunyan';
+import morgan from 'morgan';
 import { config } from '@root/config';
 import applicationRoutes from '@root/routes';
 import { CustomError, IErrorResponse } from '@globals/helpers/error-handler';
+import { redisConnection } from '@services/redis/redis.connection';
 
 const log: Logger = config.createLogger('server');
 
 export class ChattyServer {
-  private app: Application;
+  private readonly app: Application;
 
   constructor(app: Application) {
     this.app = app;
@@ -44,8 +45,8 @@ export class ChattyServer {
       cookieSession({
         name: 'session',
         keys: [config.COOKIE_SECRET_KEY_ONE!, config.COOKIE_SECRET_KEY_TWO!],
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure: config.NODE_ENV === 'development' ? false : true
+        maxAge: config.getTokenExpirationInMs(),
+        secure: config.NODE_ENV !== 'development'
       })
     );
     app.use(hpp());
@@ -67,6 +68,16 @@ export class ChattyServer {
   }
 
   private routesMiddleware(app: Application): void {
+    if (config.NODE_ENV === 'development') {
+      app.use(
+        morgan('dev', {
+          skip: function (req: Request) {
+            const skipPaths = ['/queues'];
+            return skipPaths.some((path) => req.originalUrl.startsWith(path));
+          }
+        })
+      );
+    }
     applicationRoutes(app);
   }
 
@@ -112,15 +123,14 @@ export class ChattyServer {
       }
     });
 
-    const pubClient = createClient({ url: config.REDIS_URL });
+    const pubClient = redisConnection;
     const subClient = pubClient.duplicate();
-    await Promise.all([pubClient.connect(), subClient.connect()]);
     io.adapter(createAdapter(pubClient, subClient));
     return io;
   }
 
   private startHttpServer(httpServer: http.Server): void {
-    log.info(`Server has started with process ${process.pid}`);
+    log.info(`Server has started with process id ${process.pid}`);
     httpServer.listen(config.SERVER_PORT, () => {
       log.info(`Server is running on port ${config.SERVER_PORT}`);
     });
