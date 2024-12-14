@@ -3,6 +3,7 @@ import { config } from '@root/config';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { ServerError } from '@globals/helpers/error-handler';
 import { redisConnection } from '@services/redis/redis.connection';
+import { parseRedisHashData } from '@globals/helpers/helpers';
 
 const log: Logger = config.createLogger('userCacheRepository');
 
@@ -15,12 +16,20 @@ class UserCacheRepository {
     const dataToSave: string[] = this.prepareCacheData(createdUser);
 
     try {
-      await redisConnection.zadd('user', parseInt(userUId, 10), key);
+      await redisConnection.zadd('users', parseInt(userUId, 10), key);
       await redisConnection.hset(`users:${key}`, dataToSave);
     } catch (error) {
       log.error(error);
       throw new ServerError('Server error. Try again.');
     }
+  }
+
+  public async get(key: string): Promise<IUserDocument | null> {
+    const user: IUserDocument = (await redisConnection.hgetall(
+      `users:${key}`
+    )) as unknown as IUserDocument;
+
+    return parseRedisHashData(user);
   }
 
   private prepareCacheData(user: IUserDocument): string[] {

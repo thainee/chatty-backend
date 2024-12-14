@@ -7,9 +7,31 @@ class UserRepository {
     await UserModel.create(data);
   }
 
+  public async getById(id: string): Promise<IUserDocument> {
+    const users: IUserDocument[] = await UserModel.aggregate([
+      ...this.getUserAggregationPipeline('_id', new mongoose.Types.ObjectId(id))
+    ]);
+
+    return users[0];
+  }
+
   public async getByAuthId(authId: string): Promise<IUserDocument> {
     const users: IUserDocument[] = await UserModel.aggregate([
-      { $match: { authId: new mongoose.Types.ObjectId(authId) } },
+      ...this.getUserAggregationPipeline(
+        'authId',
+        new mongoose.Types.ObjectId(authId)
+      )
+    ]);
+
+    return users[0];
+  }
+
+  private getUserAggregationPipeline(
+    matchField: string,
+    matchValue: mongoose.Types.ObjectId
+  ) {
+    return [
+      { $match: { [matchField]: matchValue } },
       {
         $lookup: {
           from: 'Auth',
@@ -20,9 +42,7 @@ class UserRepository {
       },
       { $unwind: '$auth' },
       { $project: this.aggregateProject() }
-    ]);
-
-    return users[0];
+    ];
   }
 
   private aggregateProject() {

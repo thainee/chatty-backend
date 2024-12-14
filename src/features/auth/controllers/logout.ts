@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 export class LogOut {
   public async logOut(req: Request, res: Response): Promise<void> {
     req.session = null;
+    req.currentUser = undefined;
     res.status(HTTP_STATUS.OK).json({ message: 'Logged out successfully' });
   }
 }

@@ -31,14 +31,17 @@ export class LogIn {
 
     const userJWT = jwt.sign(
       {
-        userId: existingAuth._id,
+        userId: user._id,
         uId: existingAuth.uId,
         email: existingAuth.email,
         username: existingAuth.username,
         fullname: existingAuth.fullname,
         avatarColor: existingAuth.avatarColor
       },
-      config.JWT_SECRET
+      config.JWT_SECRET,
+      {
+        expiresIn: config.TOKEN_EXPIRATION
+      }
     );
 
     const userDocument: IUserDocument = {

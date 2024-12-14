@@ -9,7 +9,10 @@ import { BadRequestError } from '@globals/helpers/error-handler';
 import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploadToCloudinary } from '@globals/helpers/cloudinary-upload';
 import { IUserDocument } from '@user/interfaces/user.interface';
-import { Helpers } from '@globals/helpers/helpers';
+import {
+  generateRandomIntegers,
+  toFirstLetterUpperCase
+} from '@globals/helpers/helpers';
 import { config } from '@root/config';
 import { userCacheRepository } from '@services/redis/user-cache.repository';
 import { authQueue } from '@services/queues/auth.queue';
@@ -36,7 +39,7 @@ export class SignUp {
 
     const authObjectId = new ObjectId();
     const userObjectId = new ObjectId();
-    const uId = `${Helpers.generateRandomIntegers(12)}`;
+    const uId = `${generateRandomIntegers(12)}`;
 
     const authDocumentData: IAuthDocument =
       SignUp.prototype.prepareAuthDocumentData({
@@ -92,7 +95,10 @@ export class SignUp {
         username: data.username,
         avatarColor: data.avatarColor
       },
-      config.JWT_SECRET
+      config.JWT_SECRET,
+      {
+        expiresIn: config.TOKEN_EXPIRATION
+      }
     );
   }
 
@@ -123,7 +129,7 @@ export class SignUp {
       authId: _id,
       uId,
       username,
-      fullname: Helpers.toFirstLetterUpperCase(fullname),
+      fullname: toFirstLetterUpperCase(fullname),
       email,
       password,
       avatarColor,
