@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
-import { includeIgnoreFiles } from '@eslint/eslintrc/lib/ignore';
+import { includeIgnoreFile } from '@eslint/compat';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +16,7 @@ const compat = new FlatCompat({
 });
 
 export default [
-  includeIgnoreFiles(gitignorePath),
+  includeIgnoreFile(gitignorePath),
   ...compat.extends(
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',

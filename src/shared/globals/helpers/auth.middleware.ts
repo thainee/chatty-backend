@@ -19,7 +19,7 @@ class AuthMiddleWare {
 
       req.currentUser = payload;
       next();
-    } catch (error) {
+    } catch {
       throw new UnauthorizedError('Invalid token. Please log in again.');
     }
   }
