@@ -20,9 +20,9 @@ class AuthRepository {
   public async getByUsername(username: string): Promise<IAuthDocument | null> {
     const query = { username: username.toLowerCase() };
 
-    const user = await AuthModel.findOne(query);
+    const auth = await AuthModel.findOne(query);
 
-    return user;
+    return auth;
   }
 
   public async getByEmail(email: string): Promise<IAuthDocument | null> {
@@ -30,9 +30,9 @@ class AuthRepository {
       email: email.toLowerCase()
     };
 
-    const user = await AuthModel.findOne(query);
+    const auth = await AuthModel.findOne(query);
 
-    return user;
+    return auth;
   }
 
   public async getByUsernameOrEmail(
@@ -45,9 +45,22 @@ class AuthRepository {
       ]
     };
 
-    const user = await AuthModel.findOne(query);
+    const auth = await AuthModel.findOne(query);
 
-    return user;
+    return auth;
+  }
+
+  public async getByPasswordResetToken(
+    token: string | unknown
+  ): Promise<IAuthDocument | null> {
+    const query = {
+      passwordResetToken: token,
+      passwordResetExpires: { $gt: Date.now() }
+    };
+
+    const auth = await AuthModel.findOne(query);
+
+    return auth;
   }
 }
 

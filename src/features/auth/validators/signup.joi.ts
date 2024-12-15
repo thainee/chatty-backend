@@ -24,11 +24,13 @@ const signupSchema: ObjectSchema = Joi.object().keys({
     .required()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ['com', 'net', 'edu', 'org'] }
+      tlds: { allow: ['com', 'net', 'edu', 'org', 'email'] }
     })
+    .max(254)
     .messages({
       'string.base': 'Email must be of type string',
       'string.email': 'Email must be valid',
+      'string.max': 'Email must be valid',
       'string.empty': 'Email is a required field'
     }),
   avatarColor: Joi.string().required().messages({

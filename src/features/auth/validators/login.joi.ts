@@ -1,7 +1,7 @@
 import Joi, { ObjectSchema } from 'joi';
 
 const loginSchema: ObjectSchema = Joi.object().keys({
-  usernameOrEmail: Joi.string().required().min(4).max(8).messages({
+  usernameOrEmail: Joi.string().required().min(4).max(254).messages({
     'string.base': 'Username or Email must be of type string',
     'string.min': 'Invalid credentials',
     'string.max': 'Invalid credentials',

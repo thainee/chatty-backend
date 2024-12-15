@@ -17,9 +17,10 @@ export class AuthRouter {
     this.router.post('/signup', SignUp.prototype.signUp);
     this.router.post('/login', LogIn.prototype.logIn);
     this.router.post(
-      'forgot-password',
+      '/forgot-password',
       Password.prototype.sendPasswordResetRequestEmail
     );
+    this.router.post('/reset-password', Password.prototype.resetPassword);
 
     this.router.use(authMiddleware.verifyToken);
     this.router.get('/logout', LogOut.prototype.logOut);

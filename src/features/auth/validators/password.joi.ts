@@ -1,10 +1,11 @@
 import Joi, { ObjectSchema } from 'joi';
 
 const emailSchema: ObjectSchema = Joi.object().keys({
-  email: Joi.string().email().required().messages({
-    'string.base': 'Field must be valid',
-    'string.required': 'Field must be valid',
-    'string.email': 'Field must be valid'
+  email: Joi.string().email().required().max(254).messages({
+    'string.base': 'Email must be valid',
+    'string.required': 'Email must be valid',
+    'string.max': 'Email must be valid',
+    'string.email': 'Email must be valid'
   })
 });
 
