@@ -4,6 +4,7 @@ import { LogIn } from '@auth/controllers/login';
 import { LogOut } from '@auth/controllers/logout';
 import { SignUp } from '@auth/controllers/signup';
 import { authMiddleware } from '@globals/helpers/auth.middleware';
+import { Password } from '@auth/controllers/password';
 
 export class AuthRouter {
   private readonly router: Router;
@@ -15,6 +16,10 @@ export class AuthRouter {
   public routes(): Router {
     this.router.post('/signup', SignUp.prototype.signUp);
     this.router.post('/login', LogIn.prototype.logIn);
+    this.router.post(
+      'forgot-password',
+      Password.prototype.sendPasswordResetRequestEmail
+    );
 
     this.router.use(authMiddleware.verifyToken);
     this.router.get('/logout', LogOut.prototype.logOut);

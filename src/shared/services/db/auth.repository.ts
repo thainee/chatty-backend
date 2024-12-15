@@ -6,6 +6,17 @@ class AuthRepository {
     await AuthModel.create(data);
   }
 
+  public async updatePasswordResetToken(
+    id: string,
+    token: string,
+    tokenExpiration: number
+  ): Promise<void> {
+    await AuthModel.updateOne(
+      { _id: id },
+      { passwordResetToken: token, passwordResetExpires: tokenExpiration }
+    );
+  }
+
   public async getByUsername(username: string): Promise<IAuthDocument | null> {
     const query = { username: username.toLowerCase() };
 
