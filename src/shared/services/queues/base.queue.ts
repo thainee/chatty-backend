@@ -1,15 +1,16 @@
 import { Queue, Job, Worker } from 'bullmq';
 import Logger from 'bunyan';
+import IORedis from 'ioredis';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { config } from '@root/config';
 import { IAuthJob } from '@auth/interfaces/auth.interface';
-import IORedis from 'ioredis';
+import { IEmailJob } from '@user/interfaces/user.interface';
 
 const connection = new IORedis({ maxRetriesPerRequest: null });
 
-type IBaseJobData = IAuthJob;
+type IBaseJobData = IAuthJob | IEmailJob;
 
 let bullAdapter: BullMQAdapter[] = [];
 

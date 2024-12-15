@@ -17,6 +17,10 @@ class Config {
   public readonly CLOUD_NAME: string;
   public readonly CLOUD_API_KEY: string;
   public readonly CLOUD_API_SECRET: string;
+  public readonly SENDER_EMAIL: string;
+  public readonly SENDER_EMAIL_PASSWORD: string;
+  public readonly SENDGRID_API_KEY: string;
+  public readonly SENDGRID_SENDER: string;
 
   constructor() {
     this.DATABASE_URL = this.getEnvVar('DATABASE_URL');
@@ -31,6 +35,10 @@ class Config {
     this.CLOUD_NAME = this.getEnvVar('CLOUD_NAME');
     this.CLOUD_API_KEY = this.getEnvVar('CLOUD_API_KEY');
     this.CLOUD_API_SECRET = this.getEnvVar('CLOUD_API_SECRET');
+    this.SENDER_EMAIL = this.getEnvVar('SENDER_EMAIL');
+    this.SENDER_EMAIL_PASSWORD = this.getEnvVar('SENDER_EMAIL_PASSWORD');
+    this.SENDGRID_API_KEY = this.getEnvVar('SENDGRID_API_KEY');
+    this.SENDGRID_SENDER = this.getEnvVar('SENDGRID_SENDER');
 
     this.loadCloudinaryConfig();
   }
